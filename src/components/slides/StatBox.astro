@@ -1,0 +1,38 @@
+---
+// Dashed-border stat box — wraps one or more <Stat> children plus an
+// optional footnote.
+interface Props {
+  note?: string;
+}
+
+const { note } = Astro.props;
+---
+<div class="stat-box">
+  <div class="stat-row">
+    <slot />
+  </div>
+  {note && <div class="stat-note">{note}</div>}
+</div>
+
+<style>
+  .stat-box {
+    background: linear-gradient(135deg, #fff, #f7ecdd);
+    border: 2px dashed var(--accent);
+    border-radius: 22px;
+    padding: 28px;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 34px;
+    margin-top: 6px;
+  }
+  .stat-note {
+    font-size: 13px;
+    color: #8a725c;
+    margin-top: 16px;
+  }
+</style>

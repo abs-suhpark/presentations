@@ -1,0 +1,38 @@
+/*
+ * Coffee theme — ported 1:1 from public/html/coffee_icebreaker/index.html.
+ * Applied wherever a `[data-theme="coffee"]` attribute is set (expected on <html>).
+ * Paints html/body directly so the hero's rounded bottom corners never reveal
+ * the page's default background.
+ */
+
+[data-theme='coffee'] {
+  --espresso: #3b2417;
+  --coffee: #6f4e37;
+  --latte: #c8a27c;
+  --cream: #f5ede2;
+  --foam: #fffaf3;
+  --accent: #d98c3f;
+  --green: #4a8c5f;
+}
+
+html[data-theme='coffee'],
+html[data-theme='coffee'] body {
+  background: var(--cream);
+  color: var(--espresso);
+  font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+  line-height: 1.7;
+}
+
+[data-theme='coffee'] *,
+[data-theme='coffee'] *::before,
+[data-theme='coffee'] *::after {
+  box-sizing: border-box;
+}
+
+[data-theme='coffee'] .lead {
+  font-size: 17px;
+  text-align: center;
+  color: var(--coffee);
+  margin: 0 auto 26px;
+  max-width: 640px;
+}

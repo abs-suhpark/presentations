@@ -1,0 +1,58 @@
+---
+// A single slide boundary. Every Slide emits `data-slide` + `data-title` so
+// the shared navigator (see SlideDeck's slide-nav) can build the TOC/counter
+// without any markdown-style <h2> partitioning.
+//
+// - `cover`: the deck's opening slide (hero); never renders a heading here.
+// - `title`: plain text (no emoji) — always sets data-title.
+// - `emoji`: optional emoji shown in a `.em` span before the heading.
+// - `bare`: skip Slide's own heading chrome because the slot content (e.g. a
+//   <Callout>) renders its own full-bleed heading instead.
+interface Props {
+  title?: string;
+  emoji?: string;
+  cover?: boolean;
+  bare?: boolean;
+}
+
+const { title, emoji, cover = false, bare = false } = Astro.props;
+const dataTitle = title ?? (cover ? 'Cover' : '');
+const showHeading = !cover && !bare && Boolean(title);
+---
+<section class:list={['slide', { cover }]} data-slide data-title={dataTitle}>
+  {showHeading && (
+    <>
+      <h2>{emoji && <span class="em">{emoji}</span>}{title}</h2>
+      <div class="divider"></div>
+    </>
+  )}
+  <slot />
+</section>
+
+<style>
+  .slide {
+    margin-top: 46px;
+  }
+  .slide.cover {
+    margin-top: 0;
+  }
+  h2 {
+    font-size: 26px;
+    text-align: center;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  h2 .em {
+    font-size: 30px;
+  }
+  .divider {
+    width: 56px;
+    height: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    margin: 0 auto 26px;
+  }
+</style>

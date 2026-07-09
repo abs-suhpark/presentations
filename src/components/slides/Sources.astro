@@ -1,0 +1,48 @@
+---
+// Sources footer — MDX author supplies <li><a>...</a></li> entries directly
+// as children so this component stays reusable across decks.
+interface Props {
+  heading?: string;
+}
+
+const { heading = '📚 出典（日本語）' } = Astro.props;
+---
+<div class="sources">
+  <h4>{heading}</h4>
+  <ul>
+    <slot />
+  </ul>
+</div>
+
+<style>
+  .sources {
+    margin-top: 40px;
+    font-size: 12.5px;
+    color: #8a725c;
+  }
+  .sources h4 {
+    font-size: 14px;
+    color: var(--coffee);
+    margin-bottom: 8px;
+  }
+  .sources ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sources li {
+    margin: 4px 0;
+    list-style: none;
+    padding-left: 16px;
+    position: relative;
+  }
+  .sources li::before {
+    content: '•';
+    position: absolute;
+    left: 2px;
+    color: var(--accent);
+  }
+  .sources a {
+    color: var(--coffee);
+  }
+</style>

@@ -1,0 +1,344 @@
+---
+import '../styles/markdown.css';
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description?: string;
+    date?: Date;
+  };
+  headings?: { depth: number; slug: string; text: string }[];
+  slug: string;
+}
+
+const { frontmatter, headings = [], slug } = Astro.props;
+const sections = headings.filter((h) => h.depth === 2);
+const homeHref = `/markdown/${slug}`;
+
+const formattedDate = frontmatter.date
+  ? new Date(frontmatter.date).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  : undefined;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {frontmatter.description && <meta name="description" content={frontmatter.description} />}
+    <link rel="canonical" href={homeHref} />
+    <title>{frontmatter.title}</title>
+  </head>
+  <body>
+    <div class="deck-shell" data-home-href={homeHref}>
+      <aside class="toc-sidebar">
+        <a class="sidebar-title" href={`/markdown/${slug}/present`}>{frontmatter.title}</a>
+        {formattedDate && <p class="sidebar-date">{formattedDate}</p>}
+        <a class="back-link" href={homeHref}>&larr; Read as page</a>
+        {sections.length > 0 && (
+          <nav aria-label="Slides">
+            <ol class="toc-list" id="toc-list">
+              {sections.map((h, i) => (
+                <li><a href={`#${i + 1}`}>{h.text}</a></li>
+              ))}
+            </ol>
+          </nav>
+        )}
+      </aside>
+
+      <main class="slide-stage">
+        <div class="cover-block" id="cover-block">
+          <h1>{frontmatter.title}</h1>
+          {frontmatter.description && <p class="cover-description">{frontmatter.description}</p>}
+          {formattedDate && <p class="cover-date">{formattedDate}</p>}
+        </div>
+
+        <article class="prose slide-source" id="slide-source">
+          <slot />
+        </article>
+
+        <noscript>
+          <style>#slide-controls { display: none; }</style>
+        </noscript>
+        <div class="slide-controls" id="slide-controls">
+          <button type="button" id="slide-prev" aria-label="Previous slide">&larr; Prev</button>
+          <span class="counter" id="slide-counter">1 / 1</span>
+          <button type="button" id="slide-next" aria-label="Next slide">Next &rarr;</button>
+        </div>
+
+        <div class="sr-only" id="slide-live" aria-live="polite" role="status"></div>
+      </main>
+    </div>
+
+    <script>
+      import { initSlideNavigator } from '../scripts/slideNavigator';
+
+      (function () {
+        const stage = document.querySelector('.slide-stage');
+        const source = document.getElementById('slide-source');
+        const coverBlock = document.getElementById('cover-block');
+        const controls = document.getElementById('slide-controls');
+        const deckShell = document.querySelector('.deck-shell');
+
+        if (!stage || !source) return;
+
+        // Partition: snapshot childNodes BEFORE moving anything, then build
+        // <section class="slide" data-slide data-title> for the cover and each ## section.
+        // This is markdown-specific and stays here; the generic navigator (hash router,
+        // controls, keyboard, TOC) lives in slideNavigator.ts.
+        function partition() {
+          const nodes = Array.from(source.childNodes);
+          const coverNodes = [];
+          const sectionGroups = [];
+          let current = null;
+
+          for (const node of nodes) {
+            const isH2 = node.nodeType === 1 && node.tagName === 'H2';
+            if (isH2) {
+              current = [node];
+              sectionGroups.push(current);
+            } else if (current) {
+              current.push(node);
+            } else {
+              coverNodes.push(node);
+            }
+          }
+
+          const coverSection = document.createElement('section');
+          coverSection.className = 'slide prose';
+          coverSection.dataset.slide = '0';
+          coverSection.dataset.title = coverBlock?.querySelector('h1')?.textContent || '';
+          coverSection.tabIndex = -1;
+          coverSection.setAttribute('aria-label', 'Cover');
+          if (coverBlock) coverSection.appendChild(coverBlock);
+          for (const node of coverNodes) coverSection.appendChild(node);
+
+          const built = [coverSection];
+          sectionGroups.forEach((group, i) => {
+            const sec = document.createElement('section');
+            sec.className = 'slide prose';
+            sec.dataset.slide = String(i + 1);
+            sec.tabIndex = -1;
+            const heading = group[0];
+            const title = heading.textContent || `Slide ${i + 1}`;
+            sec.setAttribute('aria-label', title);
+            sec.dataset.title = title;
+            for (const node of group) sec.appendChild(node);
+            built.push(sec);
+          });
+
+          for (const sec of built) stage.insertBefore(sec, source);
+          source.remove();
+
+          return built;
+        }
+
+        let slides;
+        try {
+          slides = partition();
+        } catch (err) {
+          // Never blank the stage: leave .slide-source visible (stacked, no-JS-like).
+          if (controls) controls.style.display = 'none';
+          return;
+        }
+
+        initSlideNavigator(slides, {
+          homeHref: deckShell?.dataset.homeHref || '/',
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+<style>
+  .deck-shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  .toc-sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 1.5rem 1.25rem;
+    border-right: 1px solid var(--color-border);
+    background: var(--color-code-bg);
+  }
+
+  .sidebar-title {
+    display: block;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--color-fg);
+    margin-bottom: 0.3rem;
+  }
+
+  .sidebar-title:hover {
+    color: var(--color-link-hover);
+  }
+
+  .sidebar-date {
+    color: var(--color-fg-muted);
+    font-size: 0.85rem;
+    margin: 0 0 0.9rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: var(--color-fg-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+
+  .toc-list li {
+    margin: 0.15rem 0;
+  }
+
+  .toc-list a {
+    display: block;
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    color: var(--color-fg-muted);
+  }
+
+  .toc-list a:hover {
+    color: var(--color-link-hover);
+    text-decoration: none;
+  }
+
+  .toc-list li.active a {
+    color: var(--color-link);
+    background: var(--color-bg);
+    font-weight: 600;
+  }
+
+  .slide-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .cover-block {
+    text-align: center;
+    padding: 3rem 1.5rem 0;
+  }
+
+  .cover-description {
+    color: var(--color-fg-muted);
+    font-size: 1.1rem;
+    margin: 0 0 0.4em;
+  }
+
+  .cover-date {
+    color: var(--color-fg-muted);
+    font-size: 0.9rem;
+  }
+
+  .slide-source {
+    flex: 1;
+  }
+
+  .slide {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-y: auto;
+    padding-top: 1rem;
+  }
+
+  /* The navigator hides inactive slides via the `hidden` attribute; the
+     `display: flex` above is author-level and would override the UA
+     `[hidden] { display: none }` rule, so restore it explicitly. */
+  .slide[hidden] {
+    display: none !important;
+  }
+
+  .slide:focus {
+    outline: none;
+  }
+
+  .slide-controls {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    padding: 0.85rem;
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .slide-controls button {
+    font: inherit;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-code-bg);
+    color: var(--color-fg);
+    cursor: pointer;
+  }
+
+  .slide-controls button:hover:not(:disabled) {
+    border-color: var(--color-link);
+    color: var(--color-link);
+  }
+
+  .slide-controls button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .counter {
+    font-size: 0.9rem;
+    color: var(--color-fg-muted);
+    min-width: 4.5ch;
+    text-align: center;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 860px) {
+    .deck-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .toc-sidebar {
+      position: static;
+      max-height: none;
+      border-right: none;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .slide,
+    .slide-stage {
+      min-height: auto;
+    }
+  }
+</style>

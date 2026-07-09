@@ -1,0 +1,53 @@
+---
+// The gradient cover hero (☕ cup, title, subtitle, pill tag).
+// `title` may contain raw HTML (e.g. `<br>`) for the original's manual line break.
+interface Props {
+  cup: string;
+  title: string;
+  sub: string;
+  tag: string;
+}
+
+const { cup, title, sub, tag } = Astro.props;
+---
+<div class="hero">
+  <div class="cup">{cup}</div>
+  <h1 set:html={title} />
+  <div class="sub">{sub}</div>
+  <div class="tag">{tag}</div>
+</div>
+
+<style>
+  .hero {
+    background: linear-gradient(135deg, var(--espresso), var(--coffee));
+    color: var(--foam);
+    text-align: center;
+    padding: 70px 20px 60px;
+    border-radius: 0 0 40px 40px;
+  }
+  .hero .cup {
+    font-size: 64px;
+  }
+  .hero h1 {
+    font-size: 38px;
+    line-height: 1.3;
+    margin: 14px 0 10px;
+  }
+  .hero .sub {
+    font-size: 18px;
+    opacity: 0.9;
+  }
+  .hero .tag {
+    display: inline-block;
+    margin-top: 22px;
+    padding: 6px 18px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    font-size: 14px;
+  }
+  @media (max-width: 520px) {
+    .hero h1 {
+      font-size: 28px;
+    }
+  }
+</style>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLI vs Chat: AI Coding Interfaces</title>
+<style>
+  :root{
+    --bg:#0e1117;
+    --panel:#161b22;
+    --panel2:#1c232d;
+    --ink:#e6edf3;
+    --muted:#9aa7b4;
+    --line:#2a333d;
+    --term:#3fb950;      /* terminal green - CLI */
+    --editor:#589bff;    /* editor blue - chat/IDE */
+    --amber:#e3b341;
+    --violet:#a371f7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Inter","Segoe UI",-apple-system,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;
+  }
+  code,.mono{font-family:"SF Mono","JetBrains Mono","Consolas",monospace;}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px 90px;}
+
+  /* Hero */
+  .hero{
+    text-align:center;padding:66px 20px 54px;
+    background:radial-gradient(120% 120% at 50% 0%,#182230 0%,var(--bg) 70%);
+    border-bottom:1px solid var(--line);
+  }
+  .hero .kbd{font-size:52px;}
+  .hero h1{font-size:36px;line-height:1.25;margin:12px 0 12px;}
+  .hero h1 .g{color:var(--term);}
+  .hero h1 .b{color:var(--editor);}
+  .hero .sub{color:var(--muted);font-size:17px;max-width:640px;margin:0 auto;}
+  .hero .tag{display:inline-block;margin-top:20px;padding:6px 16px;border:1px solid var(--line);
+    border-radius:999px;font-size:13px;color:var(--muted);}
+
+  section{margin-top:52px;}
+  h2{font-size:25px;text-align:center;margin-bottom:6px;}
+  .divider{width:54px;height:3px;background:var(--amber);border-radius:2px;margin:0 auto 24px;}
+  .lead{text-align:center;color:var(--muted);max-width:680px;margin:0 auto 26px;font-size:16px;}
+
+  /* Reframe callout */
+  .reframe{
+    background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--amber);
+    border-radius:14px;padding:22px 24px;
+  }
+  .reframe b{color:var(--amber);}
+
+  /* Two-column compare */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media(max-width:680px){.cols{grid-template-columns:1fr;}}
+  .col{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;}
+  .col .head{padding:18px 22px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);}
+  .col .head .dot{width:12px;height:12px;border-radius:50%;}
+  .col.cli .head{background:rgba(63,185,80,.08);}
+  .col.cli .dot{background:var(--term);box-shadow:0 0 10px var(--term);}
+  .col.chat .head{background:rgba(88,155,255,.08);}
+  .col.chat .dot{background:var(--editor);box-shadow:0 0 10px var(--editor);}
+  .col .head h3{font-size:18px;}
+  .col .head .ex{font-size:12px;color:var(--muted);margin-top:2px;}
+  .col .body{padding:16px 22px 22px;}
+  .col h4{font-size:13px;text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;color:var(--muted);}
+  .col ul{list-style:none;}
+  .col li{font-size:14.5px;padding:5px 0 5px 24px;position:relative;color:#cdd7e1;}
+  .pro::before{content:"+";position:absolute;left:4px;color:var(--term);font-weight:700;}
+  .con::before{content:"–";position:absolute;left:5px;color:#f0776a;font-weight:700;}
+
+  /* You were right box */
+  .verdict{
+    background:linear-gradient(135deg,#12261a,#0f1a13);
+    border:1px solid #24422e;border-radius:20px;padding:30px 28px;
+  }
+  .verdict h2{text-align:left;color:var(--term);}
+  .verdict .divider{margin:8px 0 18px;background:var(--term);}
+  .verdict p{color:#c7d6cb;font-size:15.5px;margin-bottom:12px;}
+  .verdict .yes{color:var(--term);font-weight:600;}
+  .verdict .but{color:var(--amber);font-weight:600;}
+  .chip{display:inline-block;font-size:12px;background:#1b2b20;border:1px solid #2c4a35;
+    color:#9fe0b0;border-radius:6px;padding:2px 8px;margin:2px 3px;font-family:monospace;}
+
+  /* When to use table */
+  .use{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;}
+  .ucard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;}
+  .ucard .pick{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+  .ucard.c .pick{color:var(--term);}
+  .ucard.h .pick{color:var(--editor);}
+  .ucard .scen{font-size:15px;margin-top:6px;color:#cdd7e1;}
+
+  /* bottom line */
+  .bottom{text-align:center;background:var(--panel2);border:1px solid var(--line);
+    border-radius:20px;padding:32px 24px;margin-top:52px;}
+  .bottom .q{font-size:21px;font-weight:700;}
+  .bottom .a{color:var(--muted);margin-top:10px;font-size:15px;}
+
+  .sources{margin-top:40px;font-size:12px;color:#6f7d8a;}
+  .sources h4{font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .sources li{list-style:none;padding-left:14px;position:relative;margin:4px 0;}
+  .sources li::before{content:"›";position:absolute;left:0;color:var(--amber);}
+  .sources a{color:#8fa3b5;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="kbd">⌨️</div>
+  <h1><span class="g">CLI</span> &nbsp;vs&nbsp; <span class="b">Chat / IDE</span><br>AI Coding Interfaces</h1>
+  <div class="sub">GitHub Copilot & Claude in your editor, versus Claude Code & cursor-agent in the terminal — pros, cons, and when to reach for which.</div>
+  <div class="tag">⏱️ ~5 min read</div>
+</div>
+
+<div class="wrap">
+
+  <section>
+    <div class="reframe">
+      <p>💡 <b>First, reframe the question.</b> It isn't really "CLI vs chat." Both camps now run
+      <i>agents</i> that edit files and run commands. The real split is
+      <b>terminal-native agents</b> (scriptable, composable, headless) versus
+      <b>editor-native interfaces</b> (visual, inline, human-in-the-loop). Keep that in mind — it changes the answer.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Head to head</h2>
+    <div class="divider"></div>
+    <div class="cols">
+
+      <div class="col cli">
+        <div class="head">
+          <div class="dot"></div>
+          <div><h3>CLI Agents</h3><div class="ex">Claude Code · cursor-agent · Copilot CLI</div></div>
+        </div>
+        <div class="body">
+          <h4>Strengths</h4>
+          <ul>
+            <li class="pro">Explicit context control: <code>/compact</code>, <code>/compress</code>, <code>/clear</code></li>
+            <li class="pro">Subagents run in their own context window — no clutter</li>
+            <li class="pro">Scriptable & pipeable — headless mode, cron, CI/CD</li>
+            <li class="pro">Hooks, custom commands, MCP — deeply configurable</li>
+            <li class="pro">Editor-agnostic; works over SSH & in containers</li>
+          </ul>
+          <h4>Trade-offs</h4>
+          <ul>
+            <li class="con">Diffs reviewed in the terminal, not a rich editor UI</li>
+            <li class="con">Steeper learning curve; commands to memorize</li>
+            <li class="con">Less "point-and-click" discoverability</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col chat">
+        <div class="head">
+          <div class="dot"></div>
+          <div><h3>Chat / IDE Extensions</h3><div class="ex">Copilot in VS Code · Claude in editor</div></div>
+        </div>
+        <div class="body">
+          <h4>Strengths</h4>
+          <ul>
+            <li class="pro">Rich visual diffs — review, accept/reject per hunk</li>
+            <li class="pro">Inline edits & autocomplete right where you type</li>
+            <li class="pro">Editor knows open files, selection, cursor, errors</li>
+            <li class="pro">Low friction for quick asks & small changes</li>
+            <li class="pro">Agent mode + MCP now closes much of the gap</li>
+          </ul>
+          <h4>Trade-offs</h4>
+          <ul>
+            <li class="con">Little / no manual context management exposed</li>
+            <li class="con">Hard to script, automate, or run headless</li>
+            <li class="con">Tied to one editor; heavier, more UI overhead</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="verdict">
+      <h2>Were you right about context tools? Mostly yes.</h2>
+      <div class="divider"></div>
+      <p><span class="yes">You're right:</span> manual context control is a real CLI advantage. Power features like
+      <span class="chip">/compact</span><span class="chip">/compress</span><span class="chip">subagents</span><span class="chip">--headless</span>
+      landed in the CLIs first, and terminal agents still give you the finest-grained control over what stays in the window and what gets summarized away.</p>
+      <p><span class="but">One nuance:</span> the "chat interfaces have no compaction" part is now partly outdated. Copilot CLI auto-compacts at ~80% of the window, and VS Code <b>agent mode</b> manages context automatically too — some even ship 1M-token windows. So the gap is narrowing.</p>
+      <p>Net: your instinct holds. For <b>explicit control + automation + composability</b>, CLI still leads. But the compaction gap specifically is closing — the durable CLI edge is <b>scriptability</b>, not just <code>/compact</code>.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>When to use which</h2>
+    <div class="divider"></div>
+    <div class="use">
+      <div class="ucard c">
+        <div class="pick">▸ Reach for CLI</div>
+        <div class="scen">Large refactors & long multi-step sessions where context management matters</div>
+      </div>
+      <div class="ucard c">
+        <div class="pick">▸ Reach for CLI</div>
+        <div class="scen">Automation: CI pipelines, batch edits, scripted / headless runs</div>
+      </div>
+      <div class="ucard c">
+        <div class="pick">▸ Reach for CLI</div>
+        <div class="scen">Remote / server / container work over SSH, editor-agnostic</div>
+      </div>
+      <div class="ucard h">
+        <div class="pick">▸ Reach for Chat/IDE</div>
+        <div class="scen">Quick questions, small edits, exploring unfamiliar code</div>
+      </div>
+      <div class="ucard h">
+        <div class="pick">▸ Reach for Chat/IDE</div>
+        <div class="scen">When you want to carefully review every diff visually before applying</div>
+      </div>
+      <div class="ucard h">
+        <div class="pick">▸ Reach for Chat/IDE</div>
+        <div class="scen">Autocomplete & inline flow while actively writing code yourself</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="bottom">
+    <div class="q">🎯 Bottom line</div>
+    <div class="a">Use the <span style="color:var(--editor)">IDE</span> for tight, reviewable, in-editor work.
+    Use the <span style="color:var(--term)">CLI</span> when you want power, control, and automation.<br>
+    Most pros keep both open — and switch by task, not by loyalty.</div>
+  </div>
+
+  <div class="sources">
+    <h4>Sources</h4>
+    <ul>
+      <li><a href="https://www.mindstudio.ai/blog/claude-code-compact-command-context-management">Claude Code /compact command & context management — MindStudio</a></li>
+      <li><a href="https://platform.claude.com/docs/en/build-with-claude/compaction">Compaction — Claude Platform Docs</a></li>
+      <li><a href="https://docs.github.com/en/copilot/concepts/agents/copilot-cli/context-management">Managing context in GitHub Copilot CLI — GitHub Docs</a></li>
+      <li><a href="https://code.visualstudio.com/blogs/2025/02/24/introducing-copilot-agent-mode">Introducing GitHub Copilot agent mode — VS Code</a></li>
+      <li><a href="https://github.blog/changelog/2026-06-04-larger-context-windows-and-configurable-reasoning-levels-for-github-copilot/">Larger context windows for GitHub Copilot (1M tokens) — GitHub Changelog</a></li>
+      <li><a href="https://docs.github.com/en/copilot/concepts/agents/copilot-cli/comparing-cli-features">Comparing GitHub Copilot CLI features — GitHub Docs</a></li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+---
+// A single card (icon + heading + body). Reads --card-* custom properties so
+// an ancestor (e.g. <Callout variant="decaf">) can recolor cards for its
+// context — CSS variables inherit through the DOM even across Astro's
+// per-component style scoping, unlike plain class selectors.
+interface Props {
+  ico: string;
+  title: string;
+}
+
+const { ico, title } = Astro.props;
+---
+<div class="card">
+  <div class="ico">{ico}</div>
+  <h3>{title}</h3>
+  <p><slot /></p>
+</div>
+
+<style>
+  .card {
+    background: var(--card-bg, var(--foam));
+    border-radius: 20px;
+    padding: 24px 22px;
+    box-shadow: var(--card-shadow, 0 6px 18px rgba(59, 36, 23, 0.08));
+    border: var(--card-border, 1px solid #efe3d3);
+  }
+  .card .ico {
+    font-size: 34px;
+  }
+  .card h3 {
+    font-size: 19px;
+    margin: 8px 0 6px;
+    color: var(--card-title-color, var(--coffee));
+  }
+  .card p {
+    font-size: 15px;
+    color: var(--card-text-color, #5a4636);
+  }
+</style>

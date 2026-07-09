@@ -1,0 +1,32 @@
+---
+// One big number + label inside a <StatBox>. The label may contain raw
+// `<br>` (passed as slot content) to match the original's manual line break.
+interface Props {
+  num: string;
+}
+
+const { num } = Astro.props;
+---
+<div class="stat">
+  <div class="num">{num}</div>
+  <div class="lbl"><slot /></div>
+</div>
+
+<style>
+  .stat .num {
+    font-size: 46px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat .lbl {
+    font-size: 14px;
+    color: var(--coffee);
+    margin-top: 6px;
+  }
+  @media (max-width: 520px) {
+    .stat .num {
+      font-size: 38px;
+    }
+  }
+</style>

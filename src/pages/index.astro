@@ -1,0 +1,97 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import { getCollection } from 'astro:content';
+import PresentationCard from '../components/PresentationCard.astro';
+
+const mdEntries = await getCollection('presentations', ({ data }) => !data.draft);
+const md = mdEntries.map((e) => ({
+  type: 'md' as const,
+  title: e.data.title,
+  description: e.data.description,
+  date: e.data.date,
+  cover: e.data.cover,
+  order: e.data.order ?? 0,
+  href: `markdown/${e.id}`,
+}));
+
+// HTML decks live one-per-folder as public/html/<name>/index.html.
+// Link straight to index.html so it resolves everywhere (the Astro dev server
+// does not auto-serve index.html for a bare /html/<name>/ directory URL).
+const htmlDir = path.join(process.cwd(), 'public', 'html');
+const toTitle = (name: string) =>
+  name
+    .replace(/icebreking/gi, 'icebreaking')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+const html = (fs.existsSync(htmlDir) ? fs.readdirSync(htmlDir, { withFileTypes: true }) : [])
+  .flatMap((d) => {
+    if (d.isDirectory() && fs.existsSync(path.join(htmlDir, d.name, 'index.html'))) {
+      return [{ type: 'html' as const, title: toTitle(d.name), order: 0, href: `html/${d.name}/index.html` }];
+    }
+    return [];
+  });
+
+const slidesEntries = await getCollection('slides', ({ data }) => !data.draft);
+const slides = slidesEntries.map((e) => ({
+  type: 'slides' as const,
+  title: e.data.title,
+  description: e.data.description,
+  order: e.data.order ?? 0,
+  href: `slides/${e.id}`,
+}));
+
+const items = [...md, ...html, ...slides].sort((a, b) => (a.order - b.order) || a.title.localeCompare(b.title));
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Presentations</title>
+  </head>
+  <body>
+    <main>
+      <header class="intro">
+        <h1>Presentations</h1>
+        <p>A collection of decks and slides.</p>
+      </header>
+
+      <div class="grid">
+        {items.map((item) => (
+          <PresentationCard {...item} />
+        ))}
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .intro {
+    margin-bottom: 2.5rem;
+  }
+
+  .intro h1 {
+    margin-bottom: 0.3em;
+  }
+
+  .intro p {
+    color: var(--color-fg-muted);
+    margin: 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+</style>

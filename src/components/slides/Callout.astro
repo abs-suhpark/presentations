@@ -1,0 +1,89 @@
+---
+// Two self-contained, full-bleed variants ported from the original:
+// - "decaf": green gradient section with its own heading + a <slot> for a
+//   <CardGrid>. Recolors nested <Card>s via --card-* custom properties.
+// - "punch": dark closing punchline (q + a). `a` is the default slot so it
+//   can contain a raw `<br>` like the original.
+interface Props {
+  variant: 'decaf' | 'punch';
+  emoji?: string;
+  heading?: string;
+  big?: string;
+  q?: string;
+}
+
+const { variant, emoji, heading, big, q } = Astro.props;
+---
+<div class:list={['callout', variant]}>
+  {variant === 'decaf' && (
+    <>
+      <h2>{emoji && <span class="em">{emoji}</span>}{heading}</h2>
+      <div class="divider"></div>
+      {big && <div class="big" set:html={big} />}
+      <slot />
+    </>
+  )}
+  {variant === 'punch' && (
+    <>
+      <div class="q">{q}</div>
+      <div class="a"><slot /></div>
+    </>
+  )}
+</div>
+
+<style>
+  .callout.decaf {
+    background: linear-gradient(135deg, var(--green), #3a7050);
+    color: var(--foam);
+    border-radius: 28px;
+    padding: 38px 30px;
+    text-align: center;
+    --card-bg: rgba(255, 255, 255, 0.12);
+    --card-border: none;
+    --card-shadow: none;
+    --card-title-color: #fff;
+    --card-text-color: #eef7f0;
+  }
+  .callout.decaf h2 {
+    color: var(--foam);
+    font-size: 26px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .callout.decaf h2 .em {
+    font-size: 30px;
+  }
+  .callout.decaf .divider {
+    width: 56px;
+    height: 4px;
+    background: #fff;
+    border-radius: 2px;
+    margin: 0 auto 26px;
+  }
+  .callout.decaf .big {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 6px 0 20px;
+  }
+
+  .callout.punch {
+    text-align: center;
+    background: var(--espresso);
+    color: var(--foam);
+    border-radius: 24px;
+    padding: 36px 24px;
+    margin-top: 46px;
+  }
+  .callout.punch .q {
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .callout.punch .a {
+    font-size: 16px;
+    opacity: 0.9;
+    margin-top: 10px;
+  }
+</style>

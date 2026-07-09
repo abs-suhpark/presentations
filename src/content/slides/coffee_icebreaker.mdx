@@ -1,0 +1,93 @@
+---
+title: コーヒーは「眠気覚まし」だけじゃない！
+description: 〜デカフェにも、ちゃんと効果があるんです〜
+theme: coffee
+order: 1
+---
+
+import Slide from '../../components/slides/Slide.astro';
+import Hero from '../../components/slides/Hero.astro';
+import CardGrid from '../../components/slides/CardGrid.astro';
+import Card from '../../components/slides/Card.astro';
+import StatBox from '../../components/slides/StatBox.astro';
+import Stat from '../../components/slides/Stat.astro';
+import Callout from '../../components/slides/Callout.astro';
+import Sources from '../../components/slides/Sources.astro';
+
+<Slide cover title="コーヒーは「眠気覚まし」だけじゃない！">
+  <Hero
+    cup="☕"
+    title="コーヒーは「眠気覚まし」<br>だけじゃない！"
+    sub="〜デカフェにも、ちゃんと効果があるんです〜"
+    tag="5分でわかる、ちょっと得するコーヒーの話"
+  />
+  <p class="lead">毎朝なんとなく飲んでいるコーヒー。<br />
+  実は「シャキッと目が覚める」以外にも、うれしい効果がたくさん見つかっています。</p>
+</Slide>
+
+<Slide title="まずは有名なコレ：覚醒効果" emoji="😴">
+  <p class="lead">カフェインが眠気のもと（アデノシン）をブロック。
+  集中力アップ・眠気覚ましは、みなさんご存じの通りです。<br />
+  …でも、コーヒーのすごさはここからが本番。</p>
+</Slide>
+
+<Slide title="実はこんな「隠れた効果」も" emoji="✨">
+  <CardGrid>
+    <Card ico="🫀" title="心臓・血管にやさしい">
+      1日3〜4杯飲む人は、循環器疾患の発症リスクが低いという研究結果が。（国立がん研究センター）
+    </Card>
+    <Card ico="🩸" title="血糖値をゆるやかに">
+      コーヒーの「クロロゲン酸」が食後の血糖値上昇をゆるやかにし、2型糖尿病の予防が期待される。
+    </Card>
+    <Card ico="😌" title="香りでリラックス">
+      コーヒーの香りを嗅ぐと脳に「α波」（リラックスの脳波）が出現。（杏林大学・古賀良彦名誉教授の研究）
+    </Card>
+    <Card ico="🌱" title="気分の落ち込みにも">
+      抗酸化作用のあるポリフェノールと香りが、抑うつ状態のリスク軽減に関わると報告されている。
+    </Card>
+  </CardGrid>
+</Slide>
+
+<Slide title="いちばん驚きのデータ：肝がん" emoji="🍀">
+  <p class="lead">約9万人を約10年追跡した国立がん研究センターの大規模調査より👇</p>
+  <StatBox note="※ ほとんど飲まない人と比べた場合。飲む量が増えるほど発生率が低下（男女とも）。">
+    <Stat num="約½">ほぼ毎日飲む人の<br />肝がん発生率</Stat>
+    <Stat num="¼">1日5杯以上飲む人の<br />肝がん発生率</Stat>
+  </StatBox>
+</Slide>
+
+<Slide title="ここが本題：デカフェも効く！" bare>
+  <Callout
+    variant="decaf"
+    emoji="🌙"
+    heading="ここが本題：デカフェも効く！"
+    big="コーヒーの健康効果の多くは、<br>カフェインではなく「クロロゲン酸」などのポリフェノールのおかげ。"
+  >
+    <CardGrid>
+      <Card ico="🩸" title="糖尿病予防はほぼ同等">
+        デカフェでも2型糖尿病リスクの低下効果は、通常コーヒーとほぼ同じと報告。
+      </Card>
+      <Card ico="🛡️" title="抗酸化パワーは健在">
+        カフェインを抜いても、クロロゲン酸などの抗酸化成分はしっかり残る。
+      </Card>
+      <Card ico="🌛" title="夜でも妊娠中でも安心">
+        眠りを邪魔せず、動悸・胃への負担も少ない。時間や体調を選ばず楽しめる。
+      </Card>
+    </CardGrid>
+  </Callout>
+</Slide>
+
+<Slide title="結論：コーヒーは「飲むサプリ」かも？" bare>
+  <Callout variant="punch" q="☕ 結論：コーヒーは「飲むサプリ」かも？">
+    目を覚ますためだけじゃない。<br />
+    眠れない夜や体調が気になるときは、デカフェで“いいとこ取り”を。
+  </Callout>
+  <Sources>
+    <li><a href="https://epi.ncc.go.jp/jphc/outcome/274.html">国立がん研究センター 多目的コホート研究（JPHC）｜コーヒー摂取と肝がんの発生率</a></li>
+    <li><a href="https://coffee.ajca.or.jp/news/info/5cqa/">全日本コーヒー協会｜コーヒー中のクロロゲン酸類とポリフェノールについて</a></li>
+    <li><a href="https://coffee.ajca.or.jp/column/4261/">全日本コーヒー協会｜コーヒーが抑うつ状態になるリスクを軽減する？</a></li>
+    <li><a href="https://heisei-ikai.or.jp/column/coffee-effect/">平成医会｜コーヒーを飲むことで得られる心身の効果（デカフェの糖尿病・死亡率への効果ほか）</a></li>
+    <li><a href="https://www.tyojyu.or.jp/net/kenkou-tyoju/koureisha-shokuji/coffe-kenkokoka.html">健康長寿ネット（長寿科学振興財団）｜コーヒーの健康効果とは</a></li>
+    <li><a href="https://andcraft-coffee.com/coffee_aroma/">コーヒーの香りとα波（杏林大学・古賀良彦名誉教授の研究の紹介）</a></li>
+  </Sources>
+</Slide>

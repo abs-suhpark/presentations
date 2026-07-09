@@ -1,0 +1,20 @@
+---
+import { getCollection, render } from 'astro:content';
+import Deck from '../../layouts/Deck.astro';
+import SlideDeck from '../../layouts/SlideDeck.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('presentations', ({ data }) => !data.draft);
+  return entries.flatMap((entry) => [
+    { params: { slug: entry.id },              props: { entry, mode: 'page' } },
+    { params: { slug: `${entry.id}/present` }, props: { entry, mode: 'present' } },
+  ]);
+}
+
+const { entry, mode } = Astro.props;
+const { Content, headings } = await render(entry);
+const Layout = mode === 'present' ? SlideDeck : Deck;
+---
+<Layout frontmatter={entry.data} headings={headings} slug={entry.id}>
+  <Content />
+</Layout>

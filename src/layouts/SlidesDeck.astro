@@ -1,0 +1,233 @@
+---
+// Present/slide view for an MDX slide deck. The authored `<Slide>` sections
+// (see src/components/slides/Slide.astro) already emit the `.slide`/`data-title`
+// contract the shared navigator expects — unlike the markdown SlideDeck, there is
+// no partitioning to do and no cover to synthesize (the authored `<Slide cover>`
+// hero IS the cover, slide 0). This layout only emits the navigator's required
+// DOM and wires it up; see src/scripts/slideNavigator.ts for the contract.
+import '../styles/themes/coffee.css';
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description?: string;
+    date?: Date;
+    theme: string;
+  };
+  slug: string;
+}
+
+const { frontmatter, slug } = Astro.props;
+const homeHref = `${import.meta.env.BASE_URL}slides/${slug}`;
+---
+<!doctype html>
+<html lang="en" data-theme={frontmatter.theme ?? 'coffee'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {frontmatter.description && <meta name="description" content={frontmatter.description} />}
+    <link rel="canonical" href={homeHref} />
+    <title>{frontmatter.title}</title>
+  </head>
+  <body>
+    <div class="deck-shell" data-home-href={homeHref}>
+      <aside class="toc-sidebar">
+        <a class="sidebar-title" href={homeHref}>{frontmatter.title}</a>
+        <a class="back-link" href={homeHref}>&larr; Read as page</a>
+      </aside>
+
+      <main class="slide-stage">
+        <slot />
+
+        <noscript>
+          <style>#slide-controls { display: none; }</style>
+        </noscript>
+        <div class="slide-controls" id="slide-controls">
+          <button type="button" id="slide-prev" aria-label="Previous slide">&larr; Prev</button>
+          <span class="counter" id="slide-counter">1 / 1</span>
+          <button type="button" id="slide-next" aria-label="Next slide">Next &rarr;</button>
+        </div>
+
+        <div class="sr-only" id="slide-live" aria-live="polite" role="status"></div>
+      </main>
+    </div>
+
+    <script>
+      import { initSlideNavigator } from '../scripts/slideNavigator';
+
+      (function () {
+        const deckShell = document.querySelector<HTMLElement>('.deck-shell');
+        const slides = document.querySelectorAll<HTMLElement>('.slide');
+        if (slides.length === 0) return;
+
+        initSlideNavigator(slides, {
+          homeHref: deckShell?.dataset.homeHref || '/',
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+<style>
+  .deck-shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  .toc-sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 1.5rem 1.25rem;
+    border-right: 1px solid var(--latte);
+    background: var(--foam);
+  }
+
+  .sidebar-title {
+    display: block;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--espresso);
+    margin-bottom: 0.3rem;
+  }
+
+  .sidebar-title:hover {
+    color: var(--accent);
+  }
+
+  .back-link {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: var(--coffee);
+    margin-bottom: 1.25rem;
+  }
+
+  .toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+
+  .toc-list li {
+    margin: 0.15rem 0;
+  }
+
+  .toc-list a {
+    display: block;
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    color: var(--coffee);
+  }
+
+  .toc-list a:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .toc-list li.active a {
+    color: var(--espresso);
+    background: var(--cream);
+    font-weight: 600;
+  }
+
+  .slide-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .slide-stage :global(.slide) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-y: auto;
+    padding-top: 1rem;
+  }
+
+  /* The navigator hides inactive slides via the `hidden` attribute; the
+     `display: flex` above is author-level and would override the UA
+     `[hidden] { display: none }` rule, so restore it explicitly. */
+  .slide-stage :global(.slide[hidden]) {
+    display: none !important;
+  }
+
+  .slide-stage :global(.slide:focus) {
+    outline: none;
+  }
+
+  .slide-controls {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    padding: 0.85rem;
+    background: var(--foam);
+    border-top: 1px solid var(--latte);
+  }
+
+  .slide-controls button {
+    font: inherit;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid var(--latte);
+    background: var(--cream);
+    color: var(--espresso);
+    cursor: pointer;
+  }
+
+  .slide-controls button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .slide-controls button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .counter {
+    font-size: 0.9rem;
+    color: var(--coffee);
+    min-width: 4.5ch;
+    text-align: center;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 860px) {
+    .deck-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .toc-sidebar {
+      position: static;
+      max-height: none;
+      border-right: none;
+      border-bottom: 1px solid var(--latte);
+    }
+
+    .slide-stage :global(.slide),
+    .slide-stage {
+      min-height: auto;
+    }
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+// Page/scroll view for an MDX slide deck: renders the authored `<Slide>` sections
+// stacked top-to-bottom, themed but with none of the present-mode chrome (no
+// navigator, no controls, no TOC sidebar). See SlidesDeck.astro for that view.
+import '../styles/themes/coffee.css';
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description?: string;
+    date?: Date;
+    theme: string;
+  };
+  slug: string;
+}
+
+const { frontmatter, slug } = Astro.props;
+const presentHref = `${import.meta.env.BASE_URL}slides/${slug}/present`;
+
+const formattedDate = frontmatter.date
+  ? new Date(frontmatter.date).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  : undefined;
+---
+<!doctype html>
+<html lang="en" data-theme={frontmatter.theme ?? 'coffee'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {frontmatter.description && <meta name="description" content={frontmatter.description} />}
+    <title>{frontmatter.title}</title>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="page-header">
+        <p class="page-date">{formattedDate}</p>
+        <a class="present-link" href={presentHref}>Present &#9654;</a>
+      </header>
+
+      <main class="slides-stack">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>
+
+<style>
+  .page-shell {
+    max-width: 920px;  /* match the original .wrap so the 4-card grid stays 3-per-row */
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 4rem;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .page-date {
+    margin: 0;
+    margin-right: auto;
+    font-size: 0.85rem;
+    color: var(--coffee, inherit);
+  }
+
+  .present-link {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid var(--latte, currentColor);
+    color: var(--espresso, inherit);
+    font-size: 0.9rem;
+  }
+
+  .present-link:hover {
+    background: var(--latte, transparent);
+  }
+
+  .slides-stack :global(.slide) {
+    margin-bottom: 2.5rem;
+  }
+</style>
